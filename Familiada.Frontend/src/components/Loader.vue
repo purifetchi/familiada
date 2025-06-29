@@ -1,13 +1,34 @@
 <script setup lang="ts">
+import { useSignalR } from '@/composables/useSignalR';
+import useGameStore from '@/stores/gameStore';
+import { computed, inject, onMounted, ref } from 'vue';
 
+const { connection } = inject<ReturnType<typeof useSignalR>>("signalr")!;
+const gameStore = useGameStore()
+
+const url = computed(() => {
+    if (gameStore.token === "") {
+        return "";
+    }
+
+    return `${window.location.href}host/${gameStore.token}`
+})
+
+onMounted(() => {
+    connection.value?.send("Hello")
+})
+
+const openHost = () => {
+    window.open(url.value, "_blank", "popup")
+}
 </script>
 
 <template>
     <div class="container">
         <div class="title">FAMILIADA</div>
-        <div class="info">OCZEKIWANIE NA POŁĄCZENIE ORGANIZATORA</div>
-        <div class="url">https://familiada.prefetcher.net/host/654e45-4353445t-2343er34-342</div>
-        <div class="url-info">UŻYJ LINKU POWYŻEJ ABY DOŁĄCZYĆ JAKO ORGANIZATOR</div>
+        <div class="info">OCZEKIWANIE NA POŁĄCZENIE GOSPODARZA</div>
+        <div class="url" v-if="gameStore.token !== ''" v-on:click.prevent="openHost()">{{ url }}</div>
+        <div class="url-info">UŻYJ LINKU POWYŻEJ ABY DOŁĄCZYĆ JAKO GOSPODARZ</div>
     </div>
 </template>
 
@@ -37,6 +58,8 @@
     padding: 10px;
     border: 1px solid var(--yellow);
     font-weight: bold;
+
+    cursor: pointer;
 }
 
 .url-info {

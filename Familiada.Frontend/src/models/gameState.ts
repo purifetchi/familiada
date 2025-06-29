@@ -1,4 +1,6 @@
 export enum GameState {
+    Connecting,
     Awaiting,
-    InProgress
+    InProgress,
+    ActingAsHost
 }
