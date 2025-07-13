@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Familiada.Hubs;
 using Familiada.Services;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,8 +17,9 @@ builder.Services.AddCors(options =>
                 .AllowCredentials();
         });
 });
-
+builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect("localhost:6379"));
 builder.Services.AddScoped<GameSessionService>();
+builder.Services.AddScoped<GameStoreService>();
 builder.Services.AddSignalR()
     .AddJsonProtocol(options =>
     {

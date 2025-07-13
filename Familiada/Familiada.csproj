@@ -7,7 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="Messages\" />
+      <PackageReference Include="StackExchange.Redis" Version="2.8.41" />
     </ItemGroup>
 
 </Project>

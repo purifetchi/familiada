@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useSignalR } from '@/composables/useSignalR';
+import { GameState } from '@/models/gameState';
 import useGameStore from '@/stores/gameStore';
 import { computed, inject, onMounted, ref } from 'vue';
 
@@ -26,9 +27,14 @@ const openHost = () => {
 <template>
     <div class="container">
         <div class="title">FAMILIADA</div>
-        <div class="info">OCZEKIWANIE NA POŁĄCZENIE GOSPODARZA</div>
-        <div class="url" v-if="gameStore.token !== ''" v-on:click.prevent="openHost()">{{ url }}</div>
-        <div class="url-info">UŻYJ LINKU POWYŻEJ ABY DOŁĄCZYĆ JAKO GOSPODARZ</div>
+        <div v-if="gameStore.state == GameState.Awaiting">
+            <div class="info">OCZEKIWANIE NA POŁĄCZENIE GOSPODARZA</div>
+            <div class="url" v-if="gameStore.token !== ''" v-on:click.prevent="openHost()">{{ url }}</div>
+            <div class="url-info">UŻYJ LINKU POWYŻEJ ABY DOŁĄCZYĆ JAKO GOSPODARZ</div>
+        </div>
+        <div v-else-if="gameStore.state == GameState.WaitingForHostStart">
+            <div class="info">OCZEKIWANIE NA ROZPOCZĘCIE GRY PRZEZ GOSPODARZA</div>
+        </div>
     </div>
 </template>
 
@@ -39,9 +45,10 @@ const openHost = () => {
     height: 100%;
     align-items: center;
     justify-content: center;
+    text-align: center;
 }
 
-.container > div {
+.container>div>div {
     margin-bottom: 15px;
 }
 

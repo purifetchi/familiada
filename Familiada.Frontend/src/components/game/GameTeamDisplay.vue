@@ -1,16 +1,32 @@
 <script setup lang="ts">
+import useTeamStore from '@/stores/teamStore';
+import { computed } from 'vue';
+
 
 const props = defineProps<{
-    name: string,
-    points: number
+    teamIndex: number
 }>();
+
+const teamStore = useTeamStore()
+
+const name = computed(() => {
+    return teamStore
+        .teams[props.teamIndex]
+        .name
+})
+
+const points = computed(() => {
+    return teamStore
+        .teams[props.teamIndex]
+        .points
+})
 
 </script>
 
 <template>
     <div>
-        <div>{{ props.name }}</div>
-        <div>{{ props.points }}</div>
+        <div>{{ name }}</div>
+        <div>{{ points }}</div>
     </div>
 </template>
 
