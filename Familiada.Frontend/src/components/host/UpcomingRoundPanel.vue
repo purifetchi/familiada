@@ -13,7 +13,7 @@ const beginRound = () => {
 </script>
 
 <template>
-    <div v-if="hostStore.upcomingRound !== undefined">
+    <div v-if="hostStore.upcomingRound !== undefined" class="upcoming-container">
         <div>NASTĘPNE PYTANIE: {{ hostStore.upcomingRound.question.toUpperCase() }}</div>
         <div>MNOŻNIK: {{ hostStore.upcomingRound.multiplier }}</div>
         <button v-on:click="beginRound()">ROZPOCZNIJ</button>
@@ -21,5 +21,13 @@ const beginRound = () => {
 </template>
 
 <style scoped>
-
+.upcoming-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 32px;
+}
 </style>

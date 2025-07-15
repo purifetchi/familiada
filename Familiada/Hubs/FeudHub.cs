@@ -62,12 +62,16 @@ public class FeudHub(
         await SendTeamUpdate();
     }
     
-    public async Task PrepareGame(string roundJson)
+    public async Task PrepareGame(string roundJson, string leftTeamName, string rightTeamName)
     {
         var gameSchema = JsonSerializer.Deserialize<GameSchema>(roundJson);
         await gameSessionService.SetGameSchema(GetSessionId(), gameSchema!);
 
+        await gameSessionService.SetTeamNames(GetSessionId(), leftTeamName, rightTeamName);
+        
         var state = await gameStoreService.GetStateForId(GetSessionId());
+
+        await Clients.All.SendAsync("EndRound");
         await Clients.Caller.SendAsync("ShowUpcomingRound", new UpcomingRound
         {
             Question = state!.CurrentRound!.Question,

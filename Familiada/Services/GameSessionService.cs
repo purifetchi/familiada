@@ -26,6 +26,15 @@ public class GameSessionService(GameStoreService gameStoreService)
             state.RoundIndex = 0;
         });
     }
+    
+    public async Task SetTeamNames(Guid sessionId, string leftTeamName, string rightTeamName)
+    {
+        await gameStoreService.EditGameState(sessionId, state =>
+        {
+            state.Teams[Team.Left].Name = leftTeamName;
+            state.Teams[Team.Right].Name = rightTeamName;
+        });
+    }
 
     public async Task AddAnswerToPointPool(Guid sessionId, int answerIndex)
     {
