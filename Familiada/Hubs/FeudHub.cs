@@ -43,28 +43,23 @@ public class FeudHub(
         
         await Clients.All.SendAsync("ShowPanelAnswer", index, answer.Text, answer.Points);
         
-        var shouldEndRound = await gameSessionService.AddAnswerToPointPool(GetSessionId(), index);
-        if (shouldEndRound)
-            await EndRound();
+        await gameSessionService.AddAnswerToPointPool(GetSessionId(), index);
     }
 
-    public async Task SendWrong(WrongType type)
+    public async Task SendWrong(Team team, WrongType type)
     {
-        var state = await gameStoreService.GetStateForId(GetSessionId());
-        await Clients.All.SendAsync("WrongAnswer", state!.PointsWinningTeam, type);
-
-        var shouldEndRound = await gameSessionService.IncrementWrongForTeam(GetSessionId(), state!.PointsWinningTeam, type);
-        
-        var newState = await gameStoreService.GetStateForId(GetSessionId());
-        await Clients.All.SendAsync("SetCurrentRoundPointWinningTeam", new PointWinningTeamUpdate
-        {
-            WinningTeam = (int)newState!.PointsWinningTeam,
-            CanSendBigWrongAnswers = true,
-            CanSendSmallWrongAnswers = newState.PointsWinningTeam == state.PointsWinningTeam
-        });
-
-        if (shouldEndRound)
-            await EndRound();
+        await Clients.All.SendAsync("WrongAnswer", team, type);
+    }
+    
+    public async Task ClearWrong(Team team)
+    {
+        await Clients.All.SendAsync("ClearWrongDisplay", team);
+    }
+    
+    public async Task AwardPoints(Team team)
+    {
+        await gameSessionService.AwardPoints(GetSessionId(), team);
+        await SendTeamUpdate();
     }
     
     public async Task PrepareGame(string roundJson)
@@ -91,7 +86,7 @@ public class FeudHub(
             Multiplier = state.Multiplier
         });
 
-        await SendTeamUpdate();
+        await Clients.All.SendAsync("EndRound");
     }
     
     public async Task StartRound()
@@ -105,17 +100,8 @@ public class FeudHub(
         });
 
         await Clients.All.SendAsync("SetHostRoundSchema", state.CurrentRound!);
-    }
 
-    public async Task SetStartingTeam(Team team)
-    {
-        await gameSessionService.SetPointWinningTeam(GetSessionId(), team);
-        await Clients.All.SendAsync("SetCurrentRoundPointWinningTeam", new PointWinningTeamUpdate
-        {
-            WinningTeam = (int)team,
-            CanSendBigWrongAnswers = true,
-            CanSendSmallWrongAnswers = true
-        });
+        await SendTeamUpdate();
     }
 
     private async Task SendTeamUpdate()

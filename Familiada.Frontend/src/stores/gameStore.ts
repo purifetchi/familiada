@@ -5,7 +5,8 @@ const useGameStore = defineStore("gameStore", {
     state: () => {
         return {
             token: "",
-            state: GameState.Connecting
+            state: GameState.Connecting,
+            intermissionVisible: false
         }        
     },
 })

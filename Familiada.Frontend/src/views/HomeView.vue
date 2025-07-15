@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import ConnectingScreen from '@/components/ConnectingScreen.vue';
+import GameIntermissionCover from '@/components/game/GameIntermissionCover.vue';
 import GameScreen from '@/components/GameScreen.vue';
 import Loader from '@/components/Loader.vue';
 import { useSignalR } from '@/composables/useSignalR';
@@ -10,12 +11,16 @@ import useGameStore from '@/stores/gameStore';
 import useRoundStore from '@/stores/roundStore';
 import useTeamStore from '@/stores/teamStore';
 import { inject, onMounted } from 'vue';
+import bellsSfx from '@/assets/sounds/bells.mp3';
+import { useSound } from '@vueuse/sound';
 
 const signalr = inject<ReturnType<typeof useSignalR>>('signalr')!;
 
 const state = useGameStore()
 const teams = useTeamStore()
 const round = useRoundStore()
+
+const bells = useSound(bellsSfx)
 
 onMounted(() => {
   const { connection } = signalr;
@@ -25,6 +30,10 @@ onMounted(() => {
 
   connection.value!.on("HostConnected", () => {
     state.state = GameState.WaitingForHostStart
+  })
+
+  connection.value!.on("EndRound", () => {
+    state.intermissionVisible = true;
   })
 
   connection.value!.on("SetRoundInfo", (info: RoundInfo) => {
@@ -38,9 +47,12 @@ onMounted(() => {
     round.multiplier = info.multiplier
 
     state.state = GameState.InProgress
+    state.intermissionVisible = false;
   })
 
   connection.value!.on("SetTeamData", (info: TeamUpdate[]) => {
+    bells.play()
+    
     for (var i = 0; i < info.length; i++) {
       teams.teams[i].name = info[i].name
       teams.teams[i].points = info[i].points
@@ -50,6 +62,7 @@ onMounted(() => {
 </script>
 
 <template>
+  <GameIntermissionCover v-if="state.state == GameState.InProgress" />
   <ConnectingScreen v-if="state.state == GameState.Connecting" />
   <Loader v-else-if="state.state === GameState.Awaiting || state.state == GameState.WaitingForHostStart"/>
   <GameScreen v-else />

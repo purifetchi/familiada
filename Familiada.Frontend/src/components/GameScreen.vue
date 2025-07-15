@@ -60,6 +60,10 @@ onMounted(() => {
     connection.value?.on("WrongAnswer", (team: "left" | "right", type: "big" | "small") => {
         showWrong(team, type)
     })
+
+    connection.value?.on("ClearWrongDisplay", (team: "left" | "right") => {
+        roundStore.wrongMarks[team] = []
+    })
 })
 
 </script>
