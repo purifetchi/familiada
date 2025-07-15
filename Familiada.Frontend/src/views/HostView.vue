@@ -5,14 +5,17 @@ import UpcomingRoundPanel from '@/components/host/UpcomingRoundPanel.vue';
 import { useSignalR } from '@/composables/useSignalR';
 import { GameState } from '@/models/gameState';
 import type RoundSchema from '@/models/roundSchema';
+import type TeamUpdate from '@/models/teamUpdate';
 import type UpcomingRound from '@/models/upcomingRound';
 import useGameStore from '@/stores/gameStore';
 import useHostStore from '@/stores/hostStore';
+import useTeamStore from '@/stores/teamStore';
 import { inject, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 const hostStore = useHostStore()
 const gameStore = useGameStore()
+const teams = useTeamStore()
 const route = useRoute()
 const { connection } = inject<ReturnType<typeof useSignalR>>('signalr')!;
 
@@ -43,6 +46,13 @@ onMounted(() => {
         hostStore.leaderTeam = message.winningTeam
         hostStore.canSendBigWrongAnswers = message.canSendBigWrongAnswers
         hostStore.canSendSmallWrongAnswers = message.canSendSmallWrongAnswers
+    })
+
+    connection.value!.on("SetTeamData", (info: TeamUpdate[]) => {
+        for (var i = 0; i < info.length; i++) {
+            teams.teams[i].name = info[i].name
+            teams.teams[i].points = info[i].points
+        }
     })
 })
 </script>
