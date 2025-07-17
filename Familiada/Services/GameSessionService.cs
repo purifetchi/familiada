@@ -51,7 +51,12 @@ public class GameSessionService(GameStoreService gameStoreService)
             state.AnsweredQuestions = [];
             
             state.RoundIndex++;
-            state.Multiplier++;
+            state.Multiplier = state.RoundIndex switch
+            {
+                0 or 1 => 1,
+                2 => 2,
+                _ => 3
+            };
         });
     }
 

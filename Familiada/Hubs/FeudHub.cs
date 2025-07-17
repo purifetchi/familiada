@@ -71,7 +71,7 @@ public class FeudHub(
         
         var state = await gameStoreService.GetStateForId(GetSessionId());
 
-        await Clients.All.SendAsync("EndRound");
+        await Clients.All.SendAsync("PlayIntro");
         await Clients.Caller.SendAsync("ShowUpcomingRound", new UpcomingRound
         {
             Question = state!.CurrentRound!.Question,
@@ -84,13 +84,21 @@ public class FeudHub(
         await gameSessionService.EndRound(GetSessionId());
         
         var state = await gameStoreService.GetStateForId(GetSessionId());
-        await Clients.Caller.SendAsync("ShowUpcomingRound", new UpcomingRound
-        {
-            Question = state!.CurrentRound!.Question,
-            Multiplier = state.Multiplier
-        });
 
-        await Clients.All.SendAsync("EndRound");
+        if (state!.IsEndOfGame)
+        {
+            await Clients.All.SendAsync("EndGame");
+        }
+        else
+        {
+            await Clients.Caller.SendAsync("ShowUpcomingRound", new UpcomingRound
+            {
+                Question = state.CurrentRound!.Question,
+                Multiplier = state.Multiplier
+            });
+
+            await Clients.All.SendAsync("EndRound");
+        }
     }
     
     public async Task StartRound()

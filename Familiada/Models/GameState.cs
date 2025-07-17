@@ -17,5 +17,8 @@ public class GameState
     public RoundSchema? CurrentRound => Schema?.Rounds[RoundIndex];
 
     [JsonIgnore]
+    public bool IsEndOfGame => RoundIndex >= Schema!.Rounds.Length;
+
+    [JsonIgnore]
     public int Points => AnsweredQuestions.Select(i => CurrentRound!.Answers[i].Points).Sum() * Multiplier;
 }
